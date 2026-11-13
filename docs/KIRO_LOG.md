@@ -19,3 +19,12 @@ Surprises: my first test run logged blocked events into the repo's docs/evidence
 - Step 5 was needed and done. The guard now reads the file from disk, applies a str_replace in memory (all matches with replace_all), and checks the resulting text. If the file cannot be read it falls back to the old check, and any internal error still allows. Added unit tests for fs_append and str_replace. After the upgrade, repeating steps 2 and 4 gave ALLOWED then BLOCKED.
 - Step 6: probe file deleted. `git status --short` shows nothing under src/.
 - Surprise: a save hook reformatted focus-guard.mjs to double quotes between my edits, so one edit missed its target and needed a re-read. Limit: a str_replace on a file that already holds a bad outline is now blocked even if the edit is unrelated.
+# Kiro log
+
+## 2026-11-13: rack focus spike
+
+Built `spikes/rack-focus/` (CSS backdrop-filter and mask-image overlay that follows `document.activeElement`), `tests/e2e/rack-focus.spec.ts`, and set the Playwright config to port 5183 and local Chrome (Chromium on CI). Tab, scroll and 200%/400% zoom checks pass. Frame-time numbers under CPU throttling were noisy, so no tier decision rests on them yet. Details in `spikes/rack-focus/RESULTS.md`. `src/` and `.kiro/` were not touched.
+
+## 2026-11-13: rack focus spike, round 2
+
+In spikes/rack-focus/: feathered gradient masks driven by CSS variables (no data URL per frame), a keyboard camera that glides focus toward the window centre in 260 ms, and a 1.5 s start-up probe that runs the real effect to pick the tier. Round 1 is kept as ound1.html/ound1.ts. Added ench.ts and shots.ts, 12 screenshots, new e2e checks, and a Round 2 section in RESULTS.md with 5 runs per cell in normal, --disable-gpu and CPU x4 modes. Round 2 looks better but did not beat round 1 in software rendering at tier 2; tier 1 is the safe default. Only spikes/rack-focus/, 	ests/e2e/rack-focus.spec.ts and this log were edited.
