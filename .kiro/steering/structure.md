@@ -1,0 +1,10 @@
+---
+inclusion: always
+---
+# Structure
+src/engine (pure rules) · src/ui (shell, Grimoire, Codex, settings, narrator, results, export) · src/fx (rack-focus renderer, shadows, silhouettes, particles) · src/audio (adaptive audio, captions) · src/checks (axe wrapper, per-ghost level checks, walk recorder) · src/hunt (Ghost Hunt generator and solver)
+levels/<chapter>/ (index.html, ghosts.json, lesson text) · looks/<chapter>.json · story/ (lines, hidden notes, title cards) · assets/ (sounds, fonts, art, manifest.json, licences/)
+guard/ (rules.json, check-core.mjs, held-out samples) · power/keyboard-ward/ (plugin.json, skills/keyboard-ward/SKILL.md, skills/keyboard-ward/references/ghosts.md) · tools/ (axe-runner MCP server later)
+spikes/ (throwaway experiments, each with a RESULTS.md; kept as evidence or deleted)
+tests/unit · tests/property · tests/e2e · tests/visual · docs/ (KIRO_LOG.md, evidence/, architecture.md) · scripts/
+.kiro/ is committed to git and must never be listed in .gitignore.
