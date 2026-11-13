@@ -1,0 +1,6 @@
+# Same line endings on every machine, so Kiro, git, the hooks and the formatters all see LF.
+* text=auto eol=lf
+
+# Append-only logs: when two branches add entries at the same time, keep both instead of conflicting.
+docs/KIRO_LOG.md merge=union
+docs/evidence/events.jsonl merge=union
