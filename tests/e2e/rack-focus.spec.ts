@@ -116,9 +116,87 @@ test.describe('rack focus', () => {
     await open(page, '?tier=0');
     expect(await page.evaluate(() => getComputedStyle(document.getElementById('rf') as Element).display)).toBe('none');
     await open(page, '?tier=1');
-    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#rf .near') as Element).backdropFilter)).toBe('none');
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#rf .b1') as Element).backdropFilter)).toBe('none');
     await open(page, '?tier=2');
-    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#rf .near') as Element).backdropFilter)).toContain('blur(6px)');
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#rf .b1') as Element).backdropFilter)).toContain('blur(8.49px)');
+  });
+
+  // ---------- round 2 ----------
+  const rack = (page: Page) => page.evaluate(() => (window as unknown as { __rack: Record<string, unknown> }).__rack);
+
+  test('settled: the lit core still contains the element and its ring (link, input, card; tier 2 and 1)', async ({ page }) => {
+    for (const tier of [2, 1]) {
+      await open(page, `?tier=${tier}`);
+      for (const [sel, name] of [['a[href="#a4"]', 'link'], ['input[name="city"]', 'input'], ['.cards button:nth-child(3)', 'card']] as const) {
+        for (let i = 0; i < 40; i++) {
+          if (await page.evaluate((s) => document.querySelector(s) === document.activeElement, sel)) break;
+          await page.keyboard.press('Tab');
+        }
+        await page.waitForTimeout(600);
+        const s = await sample(page);
+        // the core is the element plus 20 px, which is more than the 5 px ring
+        expect(missing(s, 20), `tier ${tier} ${name}`).toBeNull();
+      }
+    }
+  });
+
+  test('keyboard focus ends in the middle third of the window (unless the page cannot scroll further)', async ({ page }) => {
+    await open(page);
+    const count = await page.locator(FOCUSABLE).count();
+    const bad: string[] = [];
+    let centred = 0;
+    for (let i = 0; i < count; i++) {
+      await page.keyboard.press('Tab');
+      await page.waitForTimeout(450);
+      const s = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement;
+        const r = el.getBoundingClientRect();
+        return { name: el.textContent?.trim() || el.getAttribute('name') || el.tagName, mid: r.top + r.height / 2, h: innerHeight, y: scrollY, max: document.documentElement.scrollHeight - innerHeight };
+      });
+      const inMiddle = s.mid >= s.h / 3 - 1 && s.mid <= (2 * s.h) / 3 + 1;
+      const atTop = s.y <= 0.5 && s.mid < s.h / 3;
+      const atBottom = s.y >= s.max - 0.5 && s.mid > (2 * s.h) / 3;
+      if (inMiddle) centred++;
+      else if (!atTop && !atBottom) bad.push(`#${i} ${s.name}: centre ${s.mid.toFixed(0)} of ${s.h}, scrollY ${s.y.toFixed(0)}/${s.max}`);
+    }
+    console.log(`RF(camera) stops=${count} in-middle-third=${centred} at-scroll-limit=${count - centred - bad.length} bad=${bad.length}`);
+    expect(bad).toEqual([]);
+    expect(centred).toBeGreaterThan(count / 2);
+  });
+
+  test('mouse focus does not trigger the camera', async ({ page }) => {
+    await open(page);
+    await page.locator('.cards button').last().click();
+    await page.waitForTimeout(500);
+    const y1 = await page.evaluate(() => scrollY);
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => scrollY)).toBe(y1);
+  });
+
+  test('the startup probe runs for real and its result is in the readout', async ({ page }) => {
+    await open(page, ''); // no ?tier=, so the probe runs
+    await page.waitForFunction(() => (window as unknown as { __rack: { probe: { state: string } } }).__rack.probe.state === 'done', undefined, { timeout: 8000 });
+    await page.waitForTimeout(400);
+    const text = await page.locator('#ro-probe').textContent();
+    const p = (await rack(page))['probe'] as { median: number; p95: number; frames: number };
+    console.log(`RF(probe) ${text} frames=${p.frames}`);
+    expect(text).toMatch(/^probe: median [\d.]+ ms, p95 [\d.]+ ms, (kept|dropped to) tier \d$/);
+    expect(p.frames).toBeGreaterThan(20); // 1.5 s of real frames
+  });
+
+  test('forced tier skips the probe', async ({ page }) => {
+    await open(page, '?tier=2');
+    await page.waitForTimeout(500);
+    expect(await page.locator('#ro-probe').textContent()).toContain('skipped');
+  });
+
+  test('B: nothing is written to the page while the lit area does not move', async ({ page }) => {
+    await open(page);
+    await page.locator('#menu').focus();
+    await page.waitForTimeout(800);
+    const w1 = (await rack(page))['writes'];
+    await page.waitForTimeout(700);
+    expect((await rack(page))['writes']).toBe(w1);
   });
 
   test('prefers-reduced-motion forces tier 0', async ({ page }) => {

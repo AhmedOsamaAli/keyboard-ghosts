@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rack focus spike</title>
+  <title>Rack focus spike (round 2)</title>
   <style>
     :root { color-scheme: dark; --bg: #0b0d12; --panel: #1d2433; --text: #e8eaf0; --link: #8ab4ff; --ring: #ffd54a; }
     * { box-sizing: border-box; }
@@ -29,20 +29,53 @@
     .cards button { border-radius: 18px; padding: 36px 12px; }
     .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
 
-    /* ---------- the rack focus overlay ---------- */
-    #rf { position: fixed; inset: 0; z-index: 1000; pointer-events: none; transition: opacity 320ms; }
-    #rf .layer { position: absolute; inset: 0; mask-size: 100% 100%; -webkit-mask-size: 100% 100%;
-      mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; transition: opacity 320ms ease-out; }
-    /* near ring: 62% dark, 6px blur. far layer sits on top: stacked totals 82% dark, ~12px blur */
-    #rf .near { background: rgba(0, 0, 0, 0.62); backdrop-filter: blur(6px); }
-    #rf .far { background: rgba(0, 0, 0, 0.5263); backdrop-filter: blur(10.4px); }
-    #rf .drift { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(14px); opacity: 0; }
-    #rf.tier-1 .layer { backdrop-filter: none; }
+    /* ---------- the rack focus overlay (round 2: feathered gradient masks, driven by CSS variables) ----------
+       --cx/--cy/--cw/--ch is the lit core (focused element + 20px), written by rack-focus.ts only when it changes.
+       Each layer is masked by 8 gradients around the core: 4 edge bands (linear) and 4 corners (radial, centred on the
+       core corner). Together they give alpha = f(distance to the core rectangle); the core itself has no mask, so it is clear. */
+    #rf { position: fixed; inset: 0; z-index: 1000; pointer-events: none; --cx: 0px; --cy: 0px; --cw: 0px; --ch: 0px; }
+    #rf .layer { position: absolute; inset: 0; opacity: 1; transition: opacity 320ms ease-out;
+      --a: 0px; --b: 50px; /* the mask ramps from alpha 0 at distance a to alpha 1 at distance b (smoothstep) */
+      --ramp: rgb(0 0 0 / 0) var(--a),
+              rgb(0 0 0 / .156) calc(var(--a) + (var(--b) - var(--a)) * .25),
+              rgb(0 0 0 / .5) calc(var(--a) + (var(--b) - var(--a)) * .5),
+              rgb(0 0 0 / .844) calc(var(--a) + (var(--b) - var(--a)) * .75),
+              #000 var(--b);
+      mask-repeat: no-repeat;
+      mask-image:
+        linear-gradient(to top, var(--ramp)), linear-gradient(to bottom, var(--ramp)),
+        linear-gradient(to left, var(--ramp)), linear-gradient(to right, var(--ramp)),
+        radial-gradient(circle at 100% 100%, var(--ramp)), radial-gradient(circle at 0 100%, var(--ramp)),
+        radial-gradient(circle at 100% 0, var(--ramp)), radial-gradient(circle at 0 0, var(--ramp));
+      mask-size:
+        var(--cw) max(0px, var(--cy)),
+        var(--cw) max(0px, calc(100% - var(--cy) - var(--ch))),
+        max(0px, var(--cx)) var(--ch),
+        max(0px, calc(100% - var(--cx) - var(--cw))) var(--ch),
+        max(0px, var(--cx)) max(0px, var(--cy)),
+        max(0px, calc(100% - var(--cx) - var(--cw))) max(0px, var(--cy)),
+        max(0px, var(--cx)) max(0px, calc(100% - var(--cy) - var(--ch))),
+        max(0px, calc(100% - var(--cx) - var(--cw))) max(0px, calc(100% - var(--cy) - var(--ch)));
+      mask-position:
+        var(--cx) 0, var(--cx) calc(var(--cy) + var(--ch)),
+        0 var(--cy), calc(var(--cx) + var(--cw)) var(--cy),
+        0 0, calc(var(--cx) + var(--cw)) 0,
+        0 calc(var(--cy) + var(--ch)), calc(var(--cx) + var(--cw)) calc(var(--cy) + var(--ch)); }
+    /* blur: two stacked backdrop blurs of 8.49px each add up to 12px (sqrt(2 * 8.49^2)); their ramps overlap so the
+       blur grows smoothly from 0 at the core edge to 12px at 120px. */
+    #rf .blur { backdrop-filter: blur(8.49px); }
+    #rf .b1 { --a: 0px; --b: 70px; } #rf .b2 { --a: 50px; --b: 120px; }
+    /* darkness: alpha 0 at the core edge, 55% by 20px (smoothstep), then 55% to 78% by 120px (smoothstep) */
+    #rf .dark { background: #000;
+      --ramp: rgb(0 0 0 / 0) 0px, rgb(0 0 0 / .086) 5px, rgb(0 0 0 / .275) 10px, rgb(0 0 0 / .464) 15px, rgb(0 0 0 / .55) 20px,
+              rgb(0 0 0 / .586) 45px, rgb(0 0 0 / .665) 70px, rgb(0 0 0 / .744) 95px, rgb(0 0 0 / .78) 120px; }
+    /* ring removed: whole page, no hole */
+    #rf .drift { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(14px); opacity: 0; mask: none; }
+    #rf.tier-1 .blur { display: none; backdrop-filter: none; }
     #rf.tier-0 { display: none; }
-    #rf.idle { opacity: 0; }
-    #rf.drift-on .near, #rf.drift-on .far { opacity: 0; transition: opacity 900ms ease-in-out; }
+    #rf.idle .layer { opacity: 0; }
+    #rf.drift-on .blur, #rf.drift-on .dark { opacity: 0; transition: opacity 900ms ease-in-out; }
     #rf.drift-on .drift { opacity: 1; transition: opacity 900ms ease-in-out; }
-
     #readout { position: fixed; right: 8px; bottom: 8px; z-index: 2000; background: #1a1f2b; color: var(--text);
       border: 1px solid #8a93a6; border-radius: 8px; padding: 8px 12px; font: 13px/1.4 ui-monospace, monospace; max-width: 330px; }
     #readout p { margin: 0 0 2px; }
@@ -92,12 +125,13 @@
 
   <footer><p>Footer text, nothing to focus here.</p></footer>
 
-  <div id="rf" aria-hidden="true"><div class="layer near"></div><div class="layer far"></div><div class="layer drift"></div></div>
+  <div id="rf" aria-hidden="true"><div class="layer blur b1"></div><div class="layer blur b2"></div><div class="layer dark"></div><div class="layer drift"></div></div>
 
   <aside id="readout" aria-label="Rack focus readout">
     <p id="ro-tier">tier: -</p>
     <p id="ro-frame">median frame: - ms</p>
     <p id="ro-hole">hole: -</p>
+    <p id="ro-probe">probe: -</p>
     <button type="button" id="break-ring">Break the ring</button>
   </aside>
 
