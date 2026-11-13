@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "event-recorder",
+      "enabled": false,
+      "trigger": "PreToolUse",
+      "description": "Records every tool-call event to .local/events.jsonl",
+      "action": {
+        "type": "command",
+        "command": "node .kiro/scripts/record-event.mjs",
+        "timeout": 20
+      }
+    }
+  ]
+}

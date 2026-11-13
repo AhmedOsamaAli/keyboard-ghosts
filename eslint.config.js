@@ -5,5 +5,5 @@ export default tseslint.config(
   { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results', '.local'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  { files: ['scripts/**/*.mjs'], languageOptions: { globals: { console: 'readonly', process: 'readonly' } } },
+  { files: ['scripts/**/*.mjs', '.kiro/scripts/**/*.mjs'], languageOptions: { globals: { console: 'readonly', process: 'readonly' } } },
 );
