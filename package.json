@@ -1,0 +1,34 @@
+{
+  "name": "keyboard-ghosts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint && vitest run && node scripts/check-assets.mjs",
+    "test": "vitest",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "axe-core": "4.14.0",
+    "preact": "11.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
+    "@preact/preset-vite": "2.10.6",
+    "@types/node": "22.20.5",
+    "eslint": "10.14.0",
+    "fast-check": "4.10.2",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "8.3.6",
+    "vitest": "5.1.0"
+  }
+}
