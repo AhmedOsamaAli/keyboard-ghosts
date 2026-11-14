@@ -49,11 +49,17 @@ describe('focus-guard', () => {
     expect(run('{not json').status).toBe(0);
   });
   it('blocks fs_append of outline: none', () => {
-    const event = JSON.stringify({ toolName: 'fs_append', toolInput: { path: 'src/ui/x.css', text: 'a { outline: none }' } });
+    const event = JSON.stringify({
+      toolName: 'fs_append',
+      toolInput: { path: 'src/ui/x.css', text: 'a { outline: none }' },
+    });
     expect(run(event).status).toBe(2);
   });
   it('allows fs_append of a visible outline', () => {
-    const event = JSON.stringify({ toolName: 'fs_append', toolInput: { path: 'src/ui/x.css', text: 'a:focus-visible { outline: 2px solid }' } });
+    const event = JSON.stringify({
+      toolName: 'fs_append',
+      toolInput: { path: 'src/ui/x.css', text: 'a:focus-visible { outline: 2px solid }' },
+    });
     expect(run(event).status).toBe(0);
   });
   describe('str_replace checks the resulting file', () => {
@@ -62,23 +68,36 @@ describe('focus-guard', () => {
       try {
         mkdirSync(join(dir, 'src'), { recursive: true });
         writeFileSync(join(dir, 'src', 'x.css'), content);
-        const event = JSON.stringify({ toolName: 'str_replace', toolInput: { path: 'src/x.css', ...input } });
+        const event = JSON.stringify({
+          toolName: 'str_replace',
+          toolInput: { path: 'src/x.css', ...input },
+        });
         return run(event, dir).status;
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }
     }
     it('blocks a replacement that has no outline word but makes outline: 0', () => {
-      expect(replace({ oldStr: '3px solid red', newStr: '0' }, 'a { outline: 3px solid red; }')).toBe(2);
+      expect(
+        replace({ oldStr: '3px solid red', newStr: '0' }, 'a { outline: 3px solid red; }'),
+      ).toBe(2);
     });
     it('allows a harmless replacement', () => {
       expect(replace({ oldStr: '3px', newStr: '4px' }, 'a { outline: 3px solid red; }')).toBe(0);
     });
     it('blocks when replace_all makes every match bad', () => {
-      expect(replace({ oldStr: '2px solid', newStr: 'none', replace_all: true }, 'a { outline: 2px solid; } b { outline: 2px solid; }')).toBe(2);
+      expect(
+        replace(
+          { oldStr: '2px solid', newStr: 'none', replace_all: true },
+          'a { outline: 2px solid; } b { outline: 2px solid; }',
+        ),
+      ).toBe(2);
     });
     it('allows when the file cannot be read and the new text is fine', () => {
-      const event = JSON.stringify({ toolName: 'str_replace', toolInput: { path: 'src/missing.css', oldStr: 'a', newStr: 'b' } });
+      const event = JSON.stringify({
+        toolName: 'str_replace',
+        toolInput: { path: 'src/missing.css', oldStr: 'a', newStr: 'b' },
+      });
       expect(run(event).status).toBe(0);
     });
   });

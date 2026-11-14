@@ -19,7 +19,9 @@ if (!Array.isArray(manifest.assets)) {
 }
 
 const listed = new Set(
-  manifest.assets.map((a) => String(typeof a === 'string' ? a : (a.path ?? a.file ?? '')).replaceAll('\\', '/')),
+  manifest.assets.map((a) =>
+    String(typeof a === 'string' ? a : (a.path ?? a.file ?? '')).replaceAll('\\', '/'),
+  ),
 );
 
 function walk(dir) {

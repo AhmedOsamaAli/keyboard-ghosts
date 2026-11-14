@@ -16,7 +16,11 @@ async function sample(page: Page) {
     const el = document.activeElement as HTMLElement;
     const r = el.getBoundingClientRect();
     const hole = (window as unknown as { __rack: { hole: Box | null } }).__rack.hole;
-    return { name: el.textContent?.trim() || el.getAttribute('name') || el.tagName, rect: { x: r.left, y: r.top, w: r.width, h: r.height }, hole };
+    return {
+      name: el.textContent?.trim() || el.getAttribute('name') || el.tagName,
+      rect: { x: r.left, y: r.top, w: r.width, h: r.height },
+      hole,
+    };
   });
 }
 
@@ -25,7 +29,10 @@ function missing(s: { name: string; rect: Box; hole: Box | null }, margin = 0): 
   if (!h) return `${s.name}: no hole`;
   const r = s.rect;
   const ok =
-    h.x <= r.x - margin + 0.5 && h.y <= r.y - margin + 0.5 && h.x + h.w >= r.x + r.w + margin - 0.5 && h.y + h.h >= r.y + r.h + margin - 0.5;
+    h.x <= r.x - margin + 0.5 &&
+    h.y <= r.y - margin + 0.5 &&
+    h.x + h.w >= r.x + r.w + margin - 0.5 &&
+    h.y + h.h >= r.y + r.h + margin - 0.5;
   return ok ? null : `${s.name}: rect ${JSON.stringify(r)} not inside hole ${JSON.stringify(h)}`;
 }
 
@@ -43,7 +50,9 @@ async function tabAll(page: Page, settleMs = 400) {
 }
 
 test.describe('rack focus', () => {
-  test('(a) Tab through the page: hole always contains the focused rect (incl. ring)', async ({ page }) => {
+  test('(a) Tab through the page: hole always contains the focused rect (incl. ring)', async ({
+    page,
+  }) => {
     await open(page);
     const { count, problems } = await tabAll(page);
     console.log(`RF(a) stops=${count} problems=${problems.length}`);
@@ -65,7 +74,9 @@ test.describe('rack focus', () => {
     let steps = 0;
     for (const dy of [-40, -40, -40, 40, 40, 40, -120, 120]) {
       await page.mouse.wheel(0, dy);
-      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      await page.evaluate(
+        () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+      );
       const s = await sample(page);
       steps++;
       if (missing(s, RING)) lagMisses++;
@@ -76,7 +87,9 @@ test.describe('rack focus', () => {
   });
 
   for (const zoom of [2, 4]) {
-    test(`(c) ${zoom * 100}% zoom (emulated: viewport / ${zoom}, deviceScaleFactor ${zoom})`, async ({ page }) => {
+    test(`(c) ${zoom * 100}% zoom (emulated: viewport / ${zoom}, deviceScaleFactor ${zoom})`, async ({
+      page,
+    }) => {
       const cdp = await page.context().newCDPSession(page);
       await cdp.send('Emulation.setDeviceMetricsOverride', {
         width: Math.round(1280 / zoom),
@@ -95,12 +108,17 @@ test.describe('rack focus', () => {
     await open(page);
     await page.locator('#ring-test').focus();
     await page.waitForTimeout(400);
-    const opacity = (sel: string) => page.evaluate((s) => getComputedStyle(document.querySelector(s) as Element).opacity, sel);
+    const opacity = (sel: string) =>
+      page.evaluate((s) => getComputedStyle(document.querySelector(s) as Element).opacity, sel);
     expect(Number(await opacity('#rf .drift'))).toBe(0);
     await page.evaluate(() => document.getElementById('break-ring')?.click());
     await page.locator('#ring-test').focus(); // click moved focus to the readout button; return focus to the test button
     await page.waitForTimeout(1100);
-    expect(await page.evaluate(() => (window as unknown as { __rack: { driftOn: boolean } }).__rack.driftOn)).toBe(true);
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { __rack: { driftOn: boolean } }).__rack.driftOn,
+      ),
+    ).toBe(true);
     expect(Number(await opacity('#rf .drift'))).toBeGreaterThan(0.95);
     // restore the ring
     await page.evaluate(() => {
@@ -114,22 +132,40 @@ test.describe('rack focus', () => {
 
   test('tiers: forced values and tier 0 has no overlay', async ({ page }) => {
     await open(page, '?tier=0');
-    expect(await page.evaluate(() => getComputedStyle(document.getElementById('rf') as Element).display)).toBe('none');
+    expect(
+      await page.evaluate(() => getComputedStyle(document.getElementById('rf') as Element).display),
+    ).toBe('none');
     await open(page, '?tier=1');
-    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#rf .b1') as Element).backdropFilter)).toBe('none');
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.querySelector('#rf .b1') as Element).backdropFilter,
+      ),
+    ).toBe('none');
     await open(page, '?tier=2');
-    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#rf .b1') as Element).backdropFilter)).toContain('blur(8.49px)');
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.querySelector('#rf .b1') as Element).backdropFilter,
+      ),
+    ).toContain('blur(8.49px)');
   });
 
   // ---------- round 2 ----------
-  const rack = (page: Page) => page.evaluate(() => (window as unknown as { __rack: Record<string, unknown> }).__rack);
+  const rack = (page: Page) =>
+    page.evaluate(() => (window as unknown as { __rack: Record<string, unknown> }).__rack);
 
-  test('settled: the lit core still contains the element and its ring (link, input, card; tier 2 and 1)', async ({ page }) => {
+  test('settled: the lit core still contains the element and its ring (link, input, card; tier 2 and 1)', async ({
+    page,
+  }) => {
     for (const tier of [2, 1]) {
       await open(page, `?tier=${tier}`);
-      for (const [sel, name] of [['a[href="#a4"]', 'link'], ['input[name="city"]', 'input'], ['.cards button:nth-child(3)', 'card']] as const) {
+      for (const [sel, name] of [
+        ['a[href="#a4"]', 'link'],
+        ['input[name="city"]', 'input'],
+        ['.cards button:nth-child(3)', 'card'],
+      ] as const) {
         for (let i = 0; i < 40; i++) {
-          if (await page.evaluate((s) => document.querySelector(s) === document.activeElement, sel)) break;
+          if (await page.evaluate((s) => document.querySelector(s) === document.activeElement, sel))
+            break;
           await page.keyboard.press('Tab');
         }
         await page.waitForTimeout(600);
@@ -140,7 +176,9 @@ test.describe('rack focus', () => {
     }
   });
 
-  test('keyboard focus ends in the middle third of the window (unless the page cannot scroll further)', async ({ page }) => {
+  test('keyboard focus ends in the middle third of the window (unless the page cannot scroll further)', async ({
+    page,
+  }) => {
     await open(page);
     const count = await page.locator(FOCUSABLE).count();
     const bad: string[] = [];
@@ -151,15 +189,26 @@ test.describe('rack focus', () => {
       const s = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement;
         const r = el.getBoundingClientRect();
-        return { name: el.textContent?.trim() || el.getAttribute('name') || el.tagName, mid: r.top + r.height / 2, h: innerHeight, y: scrollY, max: document.documentElement.scrollHeight - innerHeight };
+        return {
+          name: el.textContent?.trim() || el.getAttribute('name') || el.tagName,
+          mid: r.top + r.height / 2,
+          h: innerHeight,
+          y: scrollY,
+          max: document.documentElement.scrollHeight - innerHeight,
+        };
       });
       const inMiddle = s.mid >= s.h / 3 - 1 && s.mid <= (2 * s.h) / 3 + 1;
       const atTop = s.y <= 0.5 && s.mid < s.h / 3;
       const atBottom = s.y >= s.max - 0.5 && s.mid > (2 * s.h) / 3;
       if (inMiddle) centred++;
-      else if (!atTop && !atBottom) bad.push(`#${i} ${s.name}: centre ${s.mid.toFixed(0)} of ${s.h}, scrollY ${s.y.toFixed(0)}/${s.max}`);
+      else if (!atTop && !atBottom)
+        bad.push(
+          `#${i} ${s.name}: centre ${s.mid.toFixed(0)} of ${s.h}, scrollY ${s.y.toFixed(0)}/${s.max}`,
+        );
     }
-    console.log(`RF(camera) stops=${count} in-middle-third=${centred} at-scroll-limit=${count - centred - bad.length} bad=${bad.length}`);
+    console.log(
+      `RF(camera) stops=${count} in-middle-third=${centred} at-scroll-limit=${count - centred - bad.length} bad=${bad.length}`,
+    );
     expect(bad).toEqual([]);
     expect(centred).toBeGreaterThan(count / 2);
   });
@@ -175,7 +224,13 @@ test.describe('rack focus', () => {
 
   test('the startup probe runs for real and its result is in the readout', async ({ page }) => {
     await open(page, ''); // no ?tier=, so the probe runs
-    await page.waitForFunction(() => (window as unknown as { __rack: { probe: { state: string } } }).__rack.probe.state === 'done', undefined, { timeout: 8000 });
+    await page.waitForFunction(
+      () =>
+        (window as unknown as { __rack: { probe: { state: string } } }).__rack.probe.state ===
+        'done',
+      undefined,
+      { timeout: 8000 },
+    );
     await page.waitForTimeout(400);
     const text = await page.locator('#ro-probe').textContent();
     const p = (await rack(page))['probe'] as { median: number; p95: number; frames: number };
@@ -202,7 +257,9 @@ test.describe('rack focus', () => {
   test('prefers-reduced-motion forces tier 0', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await open(page, '?tier=2');
-    expect(await page.evaluate(() => (window as unknown as { __rack: { tier: number } }).__rack.tier)).toBe(0);
+    expect(
+      await page.evaluate(() => (window as unknown as { __rack: { tier: number } }).__rack.tier),
+    ).toBe(0);
   });
 
   for (const tier of [2, 1, 0]) {
@@ -215,7 +272,9 @@ test.describe('rack focus', () => {
       const result = await page.evaluate(
         () =>
           new Promise<{ median: number; p95: number; n: number }>((resolve) => {
-            const els = Array.from(document.querySelectorAll<HTMLElement>('a[href], button, input'));
+            const els = Array.from(
+              document.querySelectorAll<HTMLElement>('a[href], button, input'),
+            );
             const dts: number[] = [];
             let last = 0;
             let dir = 1;
@@ -237,14 +296,20 @@ test.describe('rack focus', () => {
               if (now - start < 3000) requestAnimationFrame(step);
               else {
                 const s = [...dts].sort((p, q) => p - q);
-                resolve({ median: s[s.length >> 1] as number, p95: s[Math.floor(s.length * 0.95)] as number, n: s.length });
+                resolve({
+                  median: s[s.length >> 1] as number,
+                  p95: s[Math.floor(s.length * 0.95)] as number,
+                  n: s.length,
+                });
               }
             };
             requestAnimationFrame(step);
           }),
       );
       await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
-      console.log(`RF(d) tier=${tier} cpu=4x median=${result.median.toFixed(1)}ms p95=${result.p95.toFixed(1)}ms frames=${result.n}`);
+      console.log(
+        `RF(d) tier=${tier} cpu=4x median=${result.median.toFixed(1)}ms p95=${result.p95.toFixed(1)}ms frames=${result.n}`,
+      );
       expect(result.n).toBeGreaterThan(10);
     });
   }

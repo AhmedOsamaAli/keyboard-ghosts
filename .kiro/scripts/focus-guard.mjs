@@ -1,42 +1,39 @@
 // Blocks writes that remove the keyboard focus outline from the game's own UI.
 // Exit 2 = blocked. Exit 0 = allowed (also for any failure before a decision).
-import { appendFileSync, mkdirSync } from "node:fs";
-import { dirname, isAbsolute, join } from "node:path";
+import { appendFileSync, mkdirSync } from 'node:fs';
+import { dirname, isAbsolute, join } from 'node:path';
 
 const EXT = /\.(css|tsx|ts|html)$/i;
 
 function collect(value, key, out) {
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     out.push({ key, value });
   } else if (Array.isArray(value)) {
     for (const item of value) collect(item, key, out);
-  } else if (value && typeof value === "object") {
+  } else if (value && typeof value === 'object') {
     for (const [k, v] of Object.entries(value)) collect(v, k, out);
   }
 }
 
 function isTargetPath(s) {
   if (s.length > 260 || /[\r\n]/.test(s) || !EXT.test(s)) return false;
-  return /(^|\/)src\//.test(s.replace(/\\/g, "/"));
+  return /(^|\/)src\//.test(s.replace(/\\/g, '/'));
 }
 
 function matchRule(text) {
   if (/focus-guard: allow/.test(text)) return null;
-  const re =
-    /(?<![\w-])(outline-style|outline-width|outline)["']?\s*:\s*([^;}\n]*)/gi;
+  const re = /(?<![\w-])(outline-style|outline-width|outline)["']?\s*:\s*([^;}\n]*)/gi;
   let m;
   while ((m = re.exec(text)) !== null) {
     const prop = m[1].toLowerCase();
     const val = m[2]
-      .replace(/!important/i, "")
-      .replace(/["',]/g, "")
+      .replace(/!important/i, '')
+      .replace(/["',]/g, '')
       .trim()
       .toLowerCase();
-    if (prop === "outline-style" && val === "none")
-      return "outline-style: none";
-    if (prop === "outline" && val === "none") return "outline: none";
-    if (prop !== "outline-style" && /^0(px|em|rem)?$/.test(val))
-      return `${prop}: 0`;
+    if (prop === 'outline-style' && val === 'none') return 'outline-style: none';
+    if (prop === 'outline' && val === 'none') return 'outline: none';
+    if (prop !== 'outline-style' && /^0(px|em|rem)?$/.test(val)) return `${prop}: 0`;
   }
   return null;
 }
@@ -63,7 +60,7 @@ function decide() {
   const raw = readStdin();
   const event = JSON.parse(raw);
   const strings = [];
-  collect(event, "", strings);
+  collect(event, '', strings);
   const target = strings.find((s) => isTargetPath(s.value));
   if (!target) return null;
   const resulting = resultOfReplace(event, target.value);
@@ -79,9 +76,9 @@ function decide() {
   return null;
 }
 
-import { readFileSync } from "node:fs";
+import { readFileSync } from 'node:fs';
 function readStdin() {
-  return readFileSync(0, "utf8");
+  return readFileSync(0, 'utf8');
 }
 
 let verdict = null;
@@ -100,7 +97,7 @@ process.stderr.write(
   `focus-guard: blocked a write to ${verdict.path}. Removing the focus outline hides keyboard focus (WCAG 2.4.7). Use :focus-visible with a visible style instead.\n`,
 );
 try {
-  const file = join(process.cwd(), "docs", "evidence", "events.jsonl");
+  const file = join(process.cwd(), 'docs', 'evidence', 'events.jsonl');
   mkdirSync(dirname(file), { recursive: true });
   appendFileSync(
     file,
@@ -108,7 +105,7 @@ try {
       time: new Date().toISOString(),
       rule: verdict.rule,
       path: verdict.path,
-    }) + "\n",
+    }) + '\n',
   );
 } catch {
   // logging must never change the decision
