@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sound lab (dev only)</title>
+    <link rel="stylesheet" href="./lab.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to the lab</a>
+    <main id="main">
+      <h1>Sound lab</h1>
+      <p>
+        This page is for the owner and for tests. It never ships. Sound is off until you press the
+        button.
+      </p>
+
+      <section aria-labelledby="h-control">
+        <h2 id="h-control">Controls</h2>
+        <p>
+          <button type="button" id="sound-toggle">Turn sound on</button>
+          <span id="sound-state">Sound is off.</span>
+        </p>
+        <p>
+          <label for="master">Master level</label>
+          <input id="master" type="range" min="-40" max="0" step="1" value="-6" />
+          <span id="master-value">-6 dB</span>
+        </p>
+        <p>
+          <label for="chapter">Chapter</label>
+          <select id="chapter"></select>
+        </p>
+        <p>
+          <button type="button" id="break">Break the light</button>
+          <button type="button" id="restore">Restore the light</button>
+          <span id="focus-state">Light: lit</span>
+        </p>
+        <p>
+          Peak level: <span id="meter">-inf dBFS</span>
+        </p>
+        <p id="tick-help">Press Tab to hear ticks (sound must be on).</p>
+      </section>
+
+      <section aria-labelledby="h-caption">
+        <h2 id="h-caption">Caption</h2>
+        <p id="caption" role="status" aria-live="polite">&nbsp;</p>
+        <p id="lab-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section aria-labelledby="h-events">
+        <h2 id="h-events">Events of this chapter</h2>
+        <ul id="events" class="buttons"></ul>
+      </section>
+
+      <section aria-labelledby="h-beds">
+        <h2 id="h-beds">Beds of this chapter</h2>
+        <p>
+          <button type="button" id="beds-start">Start beds</button>
+          <button type="button" id="beds-stop">Stop beds</button>
+          <span id="beds-state">No beds are playing.</span>
+        </p>
+      </section>
+
+      <section aria-labelledby="h-voices">
+        <h2 id="h-voices">Voices</h2>
+        <ul id="voices" class="buttons"></ul>
+      </section>
+
+      <section id="tuning" aria-label="Tuning drawer" hidden></section>
+    </main>
+    <script type="module" src="./lab.ts"></script>
+  </body>
+</html>
