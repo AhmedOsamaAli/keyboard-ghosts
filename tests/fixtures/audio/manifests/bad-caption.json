@@ -1,0 +1,26 @@
+{
+  "files": [
+    "assets/sounds/porch/wind-cold.mp3"
+  ],
+  "proofs": [
+    "assets/licences/wind-cold.txt"
+  ],
+  "sampleIds": [
+    "assets/sounds/porch/wind-cold.mp3"
+  ],
+  "manifest": {
+    "assets": [
+      {
+        "path": "assets/sounds/porch/wind-cold.mp3",
+        "source": "https://example.org/sounds/wind-cold",
+        "author": "A fictional recordist",
+        "licence": "CC0",
+        "proof": "assets/licences/wind-cold.txt",
+        "caption": "[The Cold Wind Blows]"
+      }
+    ]
+  },
+  "expected": [
+    "caption breaks the caption rules: assets/sounds/porch/wind-cold.mp3"
+  ]
+}

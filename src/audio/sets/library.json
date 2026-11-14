@@ -1,0 +1,170 @@
+{
+  "room": 0.7,
+  "beds": [
+    {
+      "id": "room-tone",
+      "voice": "room-tone",
+      "levelDb": -31,
+      "loopSeconds": 53,
+      "fadeIn": 3,
+      "fadeOut": 3,
+      "caption": "[the room hums quietly]",
+      "sample": null
+    },
+    {
+      "id": "rain-roof",
+      "voice": "rain-roof",
+      "levelDb": -36,
+      "loopSeconds": 67,
+      "fadeIn": 3,
+      "fadeOut": 3,
+      "caption": "[soft rain taps the roof]",
+      "sample": null
+    }
+  ],
+  "events": [
+    {
+      "id": "tab-tick",
+      "caption": "[a wooden tap clicks]",
+      "steps": [
+        {
+          "voice": "tap",
+          "bus": "world",
+          "levelDb": -26,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "light-dies",
+      "caption": "[a cold breath rises]",
+      "steps": [
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0.4,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "repair",
+      "caption": "[a soft chime rings]",
+      "steps": [
+        {
+          "voice": "chime",
+          "bus": "stinger",
+          "levelDb": -10,
+          "at": 0,
+          "params": {
+            "fundamentalHz": 520,
+            "tailS": 2.4
+          },
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "ghost-breath",
+      "caption": "[a ghost breathes]",
+      "steps": [
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "ghost-release",
+      "caption": "[the ghost fades away]",
+      "steps": [
+        {
+          "voice": "whoosh",
+          "bus": "world",
+          "levelDb": -13,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -20,
+          "at": 0,
+          "params": {
+            "swellS": 0.3,
+            "thinS": 0.6,
+            "toneLevel": 0.35
+          },
+          "sample": null
+        },
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -16,
+          "at": 0.7,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "chapter-card",
+      "caption": "[a soft chord swells]",
+      "steps": [
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -12,
+          "at": 0,
+          "params": {
+            "attackS": 1,
+            "tailS": 1.2
+          },
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "level-solved",
+      "caption": "[a bright chord rings]",
+      "steps": [
+        {
+          "voice": "chime",
+          "bus": "stinger",
+          "levelDb": -10,
+          "at": 0,
+          "params": {
+            "fundamentalHz": 520,
+            "tailS": 2.4
+          },
+          "sample": null
+        },
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -22,
+          "at": 0.3,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "drip",
+      "caption": "[ink drips]",
+      "steps": [
+        {
+          "voice": "drip",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    }
+  ],
+  "needsSample": ["pages", "pencil"]
+}
