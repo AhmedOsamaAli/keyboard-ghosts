@@ -8,4 +8,4 @@ inclusion: always
 - Text contrast at least 4.5:1 in every look. No flashing above 3 per second. Respect prefers-reduced-motion. Sound is off by default.
 - Use real buttons and links, labels on form controls, alt text on meaningful images.
 - Say "barriers" and "people who use a keyboard". Never frame disability as something to "feel". The game is about fixing the barrier.
-The haunted levels in levels/ contain barriers on purpose. These rules do not apply inside levels/, but each level's ?fixed=1 version must pass axe.
+The haunted levels in levels/ (and the draft levels in labs/) contain barriers on purpose. These rules do not apply inside levels/ or labs/, but each level's ?fixed=1 version must pass axe.

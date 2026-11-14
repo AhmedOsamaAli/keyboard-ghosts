@@ -39,8 +39,8 @@ fileMatchPattern: ["looks/**", "src/fx/**"]
 |---|---|---|
 | Padding around the focused item | 20 px beyond the focus ring | The ring is never blurred |
 | Corner of the lit "hole" | The item's own corner plus 12 px | Follows the item's shape |
-| Blur outside the light | 6 px near, 12 px far | Tier 1 has no blur; it uses darkness only |
-| Darkness outside the light | 62% near, 82% far | |
+| Blur outside the light | Ramps from 0 at the edge of the lit core to 12 px over 120 px | Tier 1 has no blur; it uses darkness only. Replaces "6 px near, 12 px far" after the spike |
+| Darkness outside the light | 0 at the core edge, 55% by 20 px, 78% by 120 px | Replaces 62% / 82% after the spike (the old numbers made neighbours unreadable) |
 | Light glide to a new focus | 260 ms, ease-out with a 6% overshoot | Like a focus pull |
 | Light dying (no focus ring) | 900 ms to 90% dark and 14 px blur | |
 | Snap-back on repair | 320 ms, with a 40 ms warm bloom | Followed by a slow-motion beat |
