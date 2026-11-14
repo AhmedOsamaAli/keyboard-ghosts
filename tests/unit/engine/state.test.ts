@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EVENT_KINDS } from '../../../src/engine/events';
+import { checkInvariants } from '../../../src/engine/invariants';
 import { AMBIENT_MIN, HISTORY_LIMIT, createGame, gameStateSchema } from '../../../src/engine/state';
 import { validLevel } from '../../fixtures/levels/single-faults';
 
@@ -40,5 +41,17 @@ describe('EVENT_KINDS', () => {
       'nothing-to-undo',
       'rejected',
     ]);
+  });
+});
+
+describe('createGame seed', () => {
+  it('keeps the seed as an unsigned 32-bit number', () => {
+    const level = validLevel();
+    const big = createGame(level, 2 ** 32 + 5);
+    const negative = createGame(level, -1);
+    expect(big.seed).toBe(5);
+    expect(negative.seed).toBe(4294967295);
+    expect(checkInvariants(level, big)).toEqual([]);
+    expect(checkInvariants(level, negative)).toEqual([]);
   });
 });

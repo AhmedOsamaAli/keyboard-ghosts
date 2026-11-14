@@ -213,3 +213,26 @@ describe('createEngine', () => {
     expect(r.events[0]).toMatchObject({ kind: 'rejected', reason: 'already-released' });
   });
 });
+
+describe('reset keeps what it should', () => {
+  it('keeps the older history, so each undo goes one step back', () => {
+    const start = fresh();
+    const afterA = step(level, start, repair('invisible', 'show-ring')).state;
+    const afterB = step(level, afterA, repair('faceless', 'add-name')).state;
+    const reset = step(level, afterB, { type: 'reset' }).state;
+    const one = step(level, reset, { type: 'undo' }).state;
+    expect(engine.canonical(one)).toBe(engine.canonical(afterB));
+    const two = step(level, one, { type: 'undo' }).state;
+    expect(engine.canonical(two)).toBe(engine.canonical(afterA));
+    const three = step(level, two, { type: 'undo' }).state;
+    expect(engine.canonical(three)).toBe(engine.canonical(start));
+    expect(three.ghosts).toEqual(start.ghosts);
+    expect(three.history).toEqual([]);
+  });
+
+  it('keeps the seed', () => {
+    const played = step(level, createGame(level, 123), repair('invisible', 'show-ring')).state;
+    const reset = step(level, played, { type: 'reset' }).state;
+    expect(reset.seed).toBe(123);
+  });
+});

@@ -38,3 +38,6 @@ Both Kiro windows were open in Restricted Mode (the folder was not trusted), so 
 Built the pure engine in `src/engine/` (wcag, words, schema, parse, rng, events, state, rules, selectors, invariants, restore, engine, index) with unit tests in `tests/unit/engine/`, 11 property tests and 12 mutants in `tests/property/engine/`, the arbitraries, `tests/property/fc-config.ts` (reads `FC_SEED`), two fixture files, an ESLint purity rule set for `src/engine/**` with a test, `docs/architecture/engine.md` and an updated `src/engine/README.md`. `playwright.config.ts` now reads `E2E_PORT`, then `.local/e2e-port`, else 5183 (not run).
 Counts: 49 requirements, 31 tasks, 11 properties (200 runs each), 12 mutants, 253 tests in 30 files in the whole repo. `npm run check` is green, and green again with `FC_SEED=1` and `FC_SEED=2`.
 Surprises: the brief's rule list could not express three mutants (a necessary ghost that does not count, an activePatches that ignores decoys, a reset that cannot be undone), so Rules also holds `solved`, `activePatches` and `reset` (design.md Decisions 24). The rules task needs the selectors task first, so task 9 now lists task 10 in its After line. All 12 mutants failed their property on the first run.
+
+## 2026-11-14: owner mutation check
+Owner mutation check: 46 hand-made bugs, 40 caught first time, 6 new tests added

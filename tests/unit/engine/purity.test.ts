@@ -1,5 +1,5 @@
 import { ESLint } from 'eslint';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 const eslint = new ESLint({ overrideConfigFile: 'eslint.config.js' });
 
@@ -31,6 +31,11 @@ const BAD: [string, string][] = [
 ];
 
 describe('engine purity (ESLint)', () => {
+  // The first lint loads the TypeScript parser, which is slow when the machine is busy.
+  beforeAll(async () => {
+    await lint('export const warm = 1;\n');
+  }, 120_000);
+
   it.each(BAD)('forbids %s in src/engine', async (_name, code) => {
     const errors = await lint(code);
     expect(errors.length).toBeGreaterThan(0);
