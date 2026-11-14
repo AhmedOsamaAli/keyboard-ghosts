@@ -5,6 +5,8 @@ fileMatchPattern: ["looks/**", "src/fx/**"]
 # Look bible
 
 > Approved by the project owner on Nov 13 2026. Loaded only when working on `looks/` and `src/fx/`. The numbers are **starting values**: the owner tunes them by eye with the `?tune=1` sliders, then they are locked in.
+>
+> **Nov 14 update (decision D6):** the owner chose the silent-film direction. Until the owner approves the film-look pictures, `docs/briefs/film-look.md` wins over this file for the Foyer palette, the grade and the atmosphere (tone ramps, film wear, title cards, bokeh). Sections 2, 3 and 6 to 9 stand. This file is rewritten after the approval.
 
 ---
 
