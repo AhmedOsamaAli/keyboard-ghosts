@@ -148,3 +148,20 @@ describe('solved and activePatches', () => {
     expect(rules.activePatches(level, state)).toEqual(level.ghosts[0]?.repairs[1]?.patches);
   });
 });
+
+describe('ambient, middle values', () => {
+  it('follows AMBIENT_MIN + (1 - AMBIENT_MIN) * released / total for 4 ghosts', () => {
+    const four = validLevel();
+    const template = structuredClone(four.ghosts[0]);
+    if (!template) throw new Error('fixture has no ghost');
+    four.ghosts.push({ ...template, id: 'fourth' });
+    expect(four.ghosts).toHaveLength(4);
+    const expected = [0.15, 0.3625, 0.575, 0.7875, 1];
+    const state = createGame(four, 1);
+    expected.forEach((value, released) => {
+      expect(rules.ambient(four, state)).toBeCloseTo(value, 10);
+      const next = four.ghosts[released];
+      if (next) state.ghosts[next.id] = { status: 'released', picked: 'x', attempts: 1 };
+    });
+  });
+});

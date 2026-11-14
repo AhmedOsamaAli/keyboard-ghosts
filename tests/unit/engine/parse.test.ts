@@ -164,3 +164,43 @@ describe('parseLevel', () => {
     }
   });
 });
+
+describe('parseLevel, upper edges', () => {
+  function withRepairs(count: number) {
+    const level = validLevel();
+    const ghost = level.ghosts[0];
+    const decoy = ghost?.repairs[1];
+    if (!ghost || !decoy) throw new Error('fixture is missing a ghost or a decoy');
+    ghost.repairs = ghost.repairs.slice(0, 2);
+    for (let n = 0; ghost.repairs.length < count; n++) {
+      ghost.repairs.push({ ...structuredClone(decoy), id: `extra-${n}` });
+    }
+    return level;
+  }
+  function withGhosts(count: number) {
+    const level = validLevel();
+    const template = level.ghosts[0];
+    if (!template) throw new Error('fixture has no ghost');
+    for (let n = 0; level.ghosts.length < count; n++) {
+      level.ghosts.push({ ...structuredClone(template), id: `extra-${n}` });
+    }
+    return level;
+  }
+
+  it('accepts a ghost with 4 repairs and rejects 5 with repair-count', () => {
+    expect(parseLevel(withRepairs(4)).ok).toBe(true);
+    expect(codesOf(withRepairs(5))).toEqual(['repair-count']);
+  });
+
+  it('accepts a level with 8 ghosts and rejects 9 with ghost-count', () => {
+    expect(parseLevel(withGhosts(8)).ok).toBe(true);
+    expect(codesOf(withGhosts(9))).toEqual(['ghost-count']);
+  });
+
+  it('also covers the lower edges', () => {
+    expect(parseLevel(withRepairs(2)).ok).toBe(true);
+    const none = validLevel();
+    none.ghosts = [];
+    expect(codesOf(none)).toEqual(['ghost-count']);
+  });
+});

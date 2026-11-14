@@ -37,14 +37,19 @@ describe('P9 Data', () => {
 
   it.each(ERROR_CODES)('breaking only %s gives exactly %s', (code) => {
     fc.assert(
-      fc.property(levelArb({ minGhosts: 2 }), fc.nat(7), (level, ghostIndex) => {
-        const copy = structuredClone(level);
-        LEVEL_BREAKERS[code](copy, ghostIndex);
-        const result = parseLevel(copy);
-        if (result.ok) return false;
-        const codes = new Set(result.errors.map((e) => e.code));
-        return codes.size === 1 && codes.has(code);
-      }),
+      fc.property(
+        levelArb({ minGhosts: 2 }),
+        fc.nat(7),
+        fc.boolean(),
+        (level, ghostIndex, tooMany) => {
+          const copy = structuredClone(level);
+          LEVEL_BREAKERS[code](copy, ghostIndex, tooMany);
+          const result = parseLevel(copy);
+          if (result.ok) return false;
+          const codes = new Set(result.errors.map((e) => e.code));
+          return codes.size === 1 && codes.has(code);
+        },
+      ),
       fcParams,
     );
   });

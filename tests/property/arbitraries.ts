@@ -176,7 +176,8 @@ export function actionsArb(
   return fc.array(action, { maxLength: options.maxLength ?? 40 });
 }
 
-type Breaker = (level: Level, ghostIndex: number) => void;
+/** 	ooMany picks the upper edge for the count faults (ghost-count, repair-count). */
+type Breaker = (level: Level, ghostIndex: number, tooMany: boolean) => void;
 
 function ghostOf(level: Level, i: number): Ghost {
   const ghost = level.ghosts[i % level.ghosts.length];
@@ -201,17 +202,31 @@ export const LEVEL_BREAKERS: Record<ErrorCode, Breaker> = {
   'level-id-invalid': (l) => {
     l.id = 'Bad Id';
   },
-  'ghost-count': (l) => {
-    l.ghosts = [];
+  'ghost-count': (l, _i, tooMany) => {
+    if (!tooMany) {
+      l.ghosts = [];
+      return;
+    }
+    const template = ghostOf(l, 0);
+    for (let n = 0; l.ghosts.length < 9; n++) {
+      l.ghosts.push({ ...structuredClone(template), id: `extra-${n}` });
+    }
   },
   'ghost-id-duplicate': (l, i) => {
     const a = i % l.ghosts.length;
     const b = (a + 1) % l.ghosts.length;
     ghostOf(l, b).id = ghostOf(l, a).id;
   },
-  'repair-count': (l, i) => {
+  'repair-count': (l, i, tooMany) => {
     const g = ghostOf(l, i);
-    g.repairs = [correctOf(g)];
+    if (!tooMany) {
+      g.repairs = [correctOf(g)];
+      return;
+    }
+    const template = decoyOf(g);
+    for (let n = 0; g.repairs.length < 5; n++) {
+      g.repairs.push({ ...structuredClone(template), id: `extra-${n}` });
+    }
   },
   'no-correct-repair': (l, i) => {
     const r = correctOf(ghostOf(l, i));
@@ -265,9 +280,10 @@ export const faultArb: fc.Arbitrary<Fault> = fc
     level: levelArb({ minGhosts: 2 }),
     code: fc.constantFrom(...ERROR_CODES),
     ghostIndex: fc.nat(7),
+    tooMany: fc.boolean(),
   })
-  .map(({ level, code, ghostIndex }) => {
+  .map(({ level, code, ghostIndex, tooMany }) => {
     const copy = structuredClone(level);
-    LEVEL_BREAKERS[code](copy, ghostIndex);
+    LEVEL_BREAKERS[code](copy, ghostIndex, tooMany);
     return { code, input: copy };
   });
