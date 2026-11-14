@@ -1,0 +1,252 @@
+{
+  "room": 1.2,
+  "beds": [
+    {
+      "id": "wind-gaps",
+      "voice": "wind-gaps",
+      "levelDb": -33,
+      "loopSeconds": 47,
+      "fadeIn": 2,
+      "fadeOut": 2,
+      "caption": "[wind whistles through gaps]",
+      "sample": null
+    },
+    {
+      "id": "rain-roof",
+      "voice": "rain-roof",
+      "levelDb": -34,
+      "loopSeconds": 61,
+      "fadeIn": 2,
+      "fadeOut": 2,
+      "caption": "[rain drums on the roof]",
+      "sample": null
+    }
+  ],
+  "events": [
+    {
+      "id": "tab-tick",
+      "caption": "[a wooden tap clicks]",
+      "steps": [
+        {
+          "voice": "tap",
+          "bus": "world",
+          "levelDb": -26,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "light-dies",
+      "caption": "[a cold breath rises]",
+      "steps": [
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0.4,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "repair",
+      "caption": "[a bright chime rings]",
+      "steps": [
+        {
+          "voice": "chime",
+          "bus": "stinger",
+          "levelDb": -9,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "ghost-breath",
+      "caption": "[a ghost breathes]",
+      "steps": [
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "ghost-release",
+      "caption": "[the ghost fades away]",
+      "steps": [
+        {
+          "voice": "whoosh",
+          "bus": "world",
+          "levelDb": -13,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -20,
+          "at": 0,
+          "params": {
+            "swellS": 0.3,
+            "thinS": 0.6,
+            "toneLevel": 0.35
+          },
+          "sample": null
+        },
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -16,
+          "at": 0.7,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "chapter-card",
+      "caption": "[a soft chord swells]",
+      "steps": [
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -12,
+          "at": 0,
+          "params": {
+            "attackS": 1,
+            "tailS": 1.2
+          },
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "level-solved",
+      "caption": "[a bright chord rings]",
+      "steps": [
+        {
+          "voice": "chime",
+          "bus": "stinger",
+          "levelDb": -9,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -22,
+          "at": 0.3,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "floor-creak",
+      "caption": "[a beam creaks]",
+      "steps": [
+        {
+          "voice": "floor-creak",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "params": {
+            "pitchLowHz": 150,
+            "pitchHighHz": 420,
+            "slipHz": 18
+          },
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "door-creak",
+      "caption": "[a hinge squeaks]",
+      "steps": [
+        {
+          "voice": "door-creak",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "params": {
+            "pitchLowHz": 300,
+            "pitchHighHz": 800,
+            "bandQ": 12,
+            "slipHz": 22,
+            "durationS": 0.6
+          },
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "chains",
+      "caption": "[a bulb chain rattles]",
+      "steps": [
+        {
+          "voice": "chains",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "heartbeat",
+      "caption": "[a heartbeat thumps]",
+      "steps": [
+        {
+          "voice": "heartbeat",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "thunder",
+      "caption": "[thunder rumbles far away]",
+      "steps": [
+        {
+          "voice": "thunder",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "riser",
+      "caption": "[a dark swell rises]",
+      "steps": [
+        {
+          "voice": "riser",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "drone",
+          "bus": "world",
+          "levelDb": -20,
+          "at": 0,
+          "params": {
+            "riseCents": 700,
+            "attackS": 2.5,
+            "durationS": 5,
+            "releaseS": 0.5
+          },
+          "sample": null
+        }
+      ]
+    }
+  ],
+  "needsSample": ["boxes"]
+}

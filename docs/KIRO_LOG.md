@@ -41,3 +41,17 @@ Surprises: the brief's rule list could not express three mutants (a necessary gh
 
 ## 2026-11-14: owner mutation check
 Owner mutation check: 46 hand-made bugs, 40 caught first time, 6 new tests added
+
+## 2026-11-14: audio-engine
+
+Built the Web Audio engine in `src/audio/`: mix maths, variation, captions and their merger, the focus curve, seeded noise, the room impulse, analysis, zod schemas, 26 code-made voices with their numbers in `voices/defaults.json`, seven chapter sound sets, the loader plan, the master chain with the focus filter and the limiter, the beds, event playing, `createAudio` and `nullAudio`. Also: the sound lab (`labs/sound/`, with a `?tune=1` drawer), the render tool (`tools/sound/render.ts`, 33 spectrograms in `docs/evidence/sound/`), the extended asset check, `docs/architecture/audio.md` and two review rounds in `docs/evidence/sound/REVIEW.md`.
+
+Counts: 31 requirements, 63 tasks. 88 unit and property tests in 26 files under `tests/unit/audio` and `tests/property/audio`: A1 to A8 at 200 runs each, and 10 mutants that each fail their property. 78 browser tests in 8 files under `tests/e2e/audio`: B1 to B7 and the lab, with 0 axe violations. The whole repo has 348 Node tests in 56 files. Every voice meets its brief §5 target.
+
+Surprises:
+- B5 failed first, by one bit. Chrome adds a node's inputs in an order that can change between runs, so the engine now sums at most two inputs per node (`graph/mixer.ts`).
+- Chrome's compressor always adds +3.42 dB of make-up gain at these settings. My first guess left every level 1.7 dB high.
+- `light-dies` plays its breath through the closed filter, so B7 measures that breath as `ghost-breath` instead.
+- A tool write once went to `c:\dev\kg-wt\scripts\` (outside the worktree). I created that folder and file by mistake and removed them at once.
+
+What the checks cannot see: whether anything sounds fake. The wind, fire, murmur and creaks need the owner's ears.

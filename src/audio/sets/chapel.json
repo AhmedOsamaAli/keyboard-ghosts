@@ -1,0 +1,215 @@
+{
+  "room": 3.2,
+  "beds": [
+    {
+      "id": "room-tone",
+      "voice": "room-tone",
+      "levelDb": -31,
+      "loopSeconds": 47,
+      "fadeIn": 3,
+      "fadeOut": 3,
+      "caption": "[an empty church hums]",
+      "sample": null
+    },
+    {
+      "id": "drone",
+      "voice": "drone",
+      "levelDb": -37,
+      "loopSeconds": 59,
+      "fadeIn": 3,
+      "fadeOut": 3,
+      "caption": "[a low drone hums]",
+      "sample": null
+    }
+  ],
+  "events": [
+    {
+      "id": "tab-tick",
+      "caption": "[a wooden tap clicks]",
+      "steps": [
+        {
+          "voice": "tap",
+          "bus": "world",
+          "levelDb": -26,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "light-dies",
+      "caption": "[a cold breath rises]",
+      "steps": [
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0.4,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "repair",
+      "caption": "[a bell tolls and bars lift]",
+      "steps": [
+        {
+          "voice": "church-bell",
+          "bus": "stinger",
+          "levelDb": -9,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "bars",
+          "bus": "stinger",
+          "levelDb": -9,
+          "at": 1.2,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "ghost-breath",
+      "caption": "[a ghost breathes]",
+      "steps": [
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "ghost-release",
+      "caption": "[the ghost fades away]",
+      "steps": [
+        {
+          "voice": "whoosh",
+          "bus": "world",
+          "levelDb": -13,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "breath",
+          "bus": "world",
+          "levelDb": -20,
+          "at": 0,
+          "params": {
+            "swellS": 0.3,
+            "thinS": 0.6,
+            "toneLevel": 0.35
+          },
+          "sample": null
+        },
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -16,
+          "at": 0.7,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "chapter-card",
+      "caption": "[a soft chord swells]",
+      "steps": [
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -12,
+          "at": 0,
+          "params": {
+            "attackS": 1,
+            "tailS": 1.2
+          },
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "level-solved",
+      "caption": "[a bright chord rings]",
+      "steps": [
+        {
+          "voice": "church-bell",
+          "bus": "stinger",
+          "levelDb": -9,
+          "at": 0,
+          "sample": null
+        },
+        {
+          "voice": "bars",
+          "bus": "stinger",
+          "levelDb": -9,
+          "at": 1.2,
+          "sample": null
+        },
+        {
+          "voice": "chord",
+          "bus": "stinger",
+          "levelDb": -22,
+          "at": 0.3,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "church-bell",
+      "caption": "[a church bell tolls]",
+      "steps": [
+        {
+          "voice": "church-bell",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "bars",
+      "caption": "[iron bars scrape]",
+      "steps": [
+        {
+          "voice": "bars",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "chains",
+      "caption": "[chains rattle]",
+      "steps": [
+        {
+          "voice": "chains",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    },
+    {
+      "id": "big-door",
+      "caption": "[a heavy door thuds]",
+      "steps": [
+        {
+          "voice": "big-door",
+          "bus": "world",
+          "levelDb": -12,
+          "at": 0,
+          "sample": null
+        }
+      ]
+    }
+  ],
+  "needsSample": ["organ and singing"]
+}

@@ -1,0 +1,24 @@
+{
+  "files": [
+    "assets/sounds/cellar/Wind.mp3"
+  ],
+  "proofs": [
+    "assets/licences/wind-cold.txt"
+  ],
+  "sampleIds": [],
+  "manifest": {
+    "assets": [
+      {
+        "path": "assets/sounds/cellar/Wind.mp3",
+        "source": "https://example.org/sounds/wind-cold",
+        "author": "A fictional recordist",
+        "licence": "CC0",
+        "proof": "assets/licences/wind-cold.txt",
+        "caption": "[cold wind blows]"
+      }
+    ]
+  },
+  "expected": [
+    "path must be assets/sounds/<chapter>/<need>-<short-name>.<ext>: assets/sounds/cellar/Wind.mp3"
+  ]
+}
