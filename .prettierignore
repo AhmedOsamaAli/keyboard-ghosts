@@ -3,7 +3,11 @@ node_modules
 test-results
 playwright-report
 package-lock.json
+.local
 docs
 spikes
 assets
+levels
+labs/**/*.html
+tests/fixtures
 **/*.md
