@@ -13,7 +13,7 @@ DOM, CSS, rendering, sound, story text, the shell, real level pages, Ghost Hunt 
 
 ## 3. Files you own
 
-- `src/engine/**`, `tests/unit/engine/**`, `tests/property/engine/**`, `tests/property/arbitraries.ts`, `tests/fixtures/levels/**`
+- `src/engine/**`, `tests/unit/engine/**`, `tests/property/engine/**`, `tests/property/arbitraries.ts`, `tests/property/fc-config.ts`, `tests/fixtures/levels/**`
 - `docs/architecture/engine.md` (create it; the integrator links it from `docs/architecture.md`)
 - `eslint.config.js` (engine rules only) and `playwright.config.ts` (task H1 only)
 - Keep `src/engine/clamp.ts` and its tests working.
@@ -60,7 +60,7 @@ Level   { id (kebab-case), chapter: ChapterId, title, look (a look file id), pag
           exit: { selector }, ghosts: Ghost[] (1 to 8, ids unique), hiddenNote?: string }
 ```
 
-`parseLevel(input: unknown)` returns `{ ok: true, level } | { ok: false, errors: { code, path, message }[] }`. Error codes (fixed): `level-id-invalid`, `ghost-count`, `ghost-id-duplicate`, `repair-count`, `no-correct-repair`, `multiple-correct-repairs`, `decoy-without-reason`, `correct-with-reason`, `line-too-long`, `wcag-unknown`, `selector-empty`, `layers-none`, `exit-selector-missing`, `patch-invalid`. Report every error, not just the first.
+`parseLevel(input: unknown)` returns `{ ok: true, level } | { ok: false, errors: { code, path, message }[] }`. Error codes (fixed): `level-id-invalid`, `ghost-count`, `ghost-id-duplicate`, `repair-count`, `no-correct-repair`, `multiple-correct-repairs`, `decoy-without-reason`, `correct-with-reason`, `line-too-long`, `wcag-unknown`, `selector-empty`, `layers-none`, `exit-selector-missing`, `patch-invalid`, plus `schema-invalid` (added after the spec audit) for input whose shape cannot be read (not an object, a wrong type, an unknown chapter) and that no other code explains. Problems found by the shape check are translated to the named codes by their path: a missing or empty ghost `selector` is `selector-empty`, a missing or empty `exit.selector` is `exit-selector-missing`, anything wrong inside a patch is `patch-invalid`, an unknown WCAG number is `wcag-unknown`. The rule checks run on everything that could be read, even when the shape check found problems. Report every error, not just the first.
 
 ## 6. WCAG 2.2 table (use exactly this; do not browse)
 
@@ -85,12 +85,12 @@ Level   { id (kebab-case), chapter: ChapterId, title, look (a look file id), pag
 
 ## 7. Engine API (pure; names are fixed, shapes are yours)
 
-- `createEngine(overrides?)`: builds the engine from small rule functions. `overrides` exists only so tests can inject broken rules (mutants, section 9). Production code never passes it.
-- `createGame(level, seed)` returns a `GameState`. State holds, per ghost: `status` (`haunting` | `released`), `picked` (repair id or null), `attempts`; plus a bounded undo history (limit 100), a step counter and the seed.
-- `step(level, state, action)` returns `{ state, events }`. Actions: `meet(ghost)`, `repair(ghost, repair)`, `undo`, `reset`.
-- Rules: a ghost has at most one picked repair; picking another replaces it and counts an attempt. A correct repair releases the ghost. A decoy leaves it haunting and emits the decoy's `why`. A released ghost cannot be changed (the action is rejected) except by undo or reset.
-- Events (fixed kinds, exported as `EVENT_KINDS` because the shell will announce each one): `ghost-met`, `repair-chosen`, `focus-restored`, `ghost-released`, `level-solved`, `undone`, `nothing-to-undo`, `rejected` (with a reason: `unknown-ghost`, `unknown-repair`, `already-released`). A correct repair emits `repair-chosen`, then `focus-restored`, then `ghost-released`, then `level-solved` if it was the last.
-- Selectors: `isSolved`, `remaining`, `progress`, `activePatches(level, state)` (a deterministic order: ghost order, then patch order), `ambient(level, state)` and `canonical(state)` (a stable string that ignores history, attempts and the step counter).
+- `createEngine(overrides?)`: builds the engine from small rule functions (`validate`, `pick`, `release`, `snapshot`, `restore`, `ambient`, `canonical`; `validate` decides which actions are allowed). `overrides` exists only so tests can inject broken rules (mutants, section 9). Production code never passes it.
+- `createGame(level, seed)` returns a `GameState`. State holds, per ghost: `status` (`haunting` | `released`), `picked` (repair id or null), `attempts`; plus a bounded undo history (limit 100), a step counter and the seed. `GameState` is plain data: it survives `JSON.parse(JSON.stringify(state))` unchanged (no Map, Set, class, function or undefined). `restoreGame(level, saved: unknown)` returns a valid `GameState` or `null` (it checks the shape and runs `checkInvariants`); the shell will use it to resume saved progress.
+- `step(level, state, action)` returns `{ state, events }`. Actions: `meet(ghost)`, `repair(ghost, repair)`, `undo`, `reset` (ghost and repair are ids). `meet` changes nothing: it returns the same state object, adds no history and does not move the step counter, which counts accepted `repair`, `undo` and `reset` actions only.
+- Rules: a ghost has at most one picked repair; picking another replaces it and counts an attempt. A correct repair releases the ghost. A decoy leaves it haunting and emits the decoy's `why`. A released ghost cannot be changed (the action is rejected) except by undo or reset. `reset` puts every ghost back to haunting with nothing picked and 0 attempts. It is undoable like a repair (it pushes one history entry), so `undo` brings the old state back.
+- Events (fixed kinds, exported as `EVENT_KINDS` because the shell will announce each one): `ghost-met`, `repair-chosen`, `focus-restored`, `ghost-released`, `level-solved`, `undone`, `level-reset`, `nothing-to-undo`, `rejected` (with a reason: `unknown-ghost`, `unknown-repair`, `already-released`). A correct repair emits `repair-chosen`, then `focus-restored`, then `ghost-released`, then `level-solved` if it was the last. `reset` emits `level-reset` (never `undone`). Every event carries the ids it is about, so the shell needs no lookup: `repair-chosen` also carries `correct` and, for a decoy, its `why`; `ghost-released` carries the ghost's `releaseLine`; `rejected` carries its reason.
+- Selectors: `isSolved`, `remaining`, `progress`, `activePatches(level, state)` (the patches of every ghost's picked repair, correct or not, because the player tests a wrong repair on the page and sees it fail; a deterministic order: ghost order, then patch order), `ambient(level, state)` and `canonical(state)` (a stable string that ignores history, attempts and the step counter).
 - `ambient` is a number from `AMBIENT_MIN` (0.15) up to 1: `AMBIENT_MIN` when nothing is released, 1 when everything is, never decreasing as ghosts are released. The look and sound will read it.
 - `src/engine/rng.ts`: a seeded generator with serialisable state: `next()`, `int(min, max)`, `pick`, `shuffle`, `fork(label)`. No global state, no `Math.random`.
 - `checkInvariants(level, state)` returns a list of violations (empty when sound). The fuzz property uses it.
@@ -101,17 +101,18 @@ Level   { id (kebab-case), chapter: ChapterId, title, look (a look file id), pag
 - P2 Commutes across ghosts: actions that target different ghosts can be reordered without changing the final canonical state.
 - P3 Every ghost is necessary: for any valid level, leaving any one ghost's correct repair out leaves the level unsolved.
 - P4 Sufficient: applying every ghost's correct repair, in any order and with decoys tried first, solves the level.
-- P5 Undo restores: after any state-changing action, `undo` returns exactly the previous canonical state. With empty history it changes nothing and emits `nothing-to-undo`.
-- P6 Ambient is bounded and monotone: always within [`AMBIENT_MIN`, 1], and never lower after one more ghost is released (without undo).
+- P5 Undo restores: after any state-changing action (`repair` or `reset`), `undo` returns exactly the previous canonical state. With empty history it changes nothing and emits `nothing-to-undo`.
+- P6 Ambient is bounded and monotone: always within [`AMBIENT_MIN`, 1], equal to `AMBIENT_MIN` when nothing is released and to 1 when everything is, and never lower after one more ghost is released (without undo).
 - P7 Seeded randomness: the same seed gives the same sequence; forks with different labels are independent; `shuffle` returns a permutation; `pick` returns a member.
-- P8 Fuzz: any sequence of valid and invalid actions never throws, and `checkInvariants` stays empty. Invalid actions change nothing and emit `rejected`.
+- P8 Fuzz: any sequence of valid and invalid actions never throws, and `checkInvariants` stays empty. Invalid actions change nothing and emit `rejected`. The test deep-freezes every level and state it passes in (an in-place change throws), checks that `step` with the same inputs gives deep-equal results, and checks that every state survives a JSON round trip and `restoreGame`.
 - P9 Data: every generated valid level parses and round-trips through JSON; breaking exactly one rule in a valid level fails with exactly the matching error code.
-- P10 Decoys never release: picking a decoy never releases the ghost and always emits that decoy's `why` word for word.
+- P10 Decoys never release: picking a decoy never releases the ghost and always emits that decoy's `why` word for word (in the `repair-chosen` event).
+- P11 Patches mirror the picks: after any action, `activePatches` holds exactly the patches of every ghost's picked repair, decoys included, in ghost order then patch order; after `undo` it equals what it was before the undone action; after `reset` it is empty.
 
 ## 9. Tests that prove the tests
 
 - Arbitraries (`tests/property/arbitraries.ts`): a valid-level generator and an action-sequence generator.
-- Mutants (`tests/property/engine/mutants.test.ts`): at least 6 deliberately broken engines built with `createEngine(overrides)` (for example: a repair that is not idempotent, one that depends on order, undo that forgets a field, a necessary ghost that does not count, ambient that can go down, a decoy that releases). For each, assert that the matching property fails. A property that cannot fail is not a property.
+- Mutants (`tests/property/engine/mutants.test.ts`): at least 10 deliberately broken engines built with `createEngine(overrides)` (for example: a repair that is not idempotent, one that depends on order, undo that forgets a field, a reset that cannot be undone, a necessary ghost that does not count, an ambient that falls back to `AMBIENT_MIN` when the last ghost is released, a decoy that releases, a `validate` that lets an unknown id through and then crashes, a rule that changes the state it was given in place, an `activePatches` that ignores decoy picks). For each, assert that the matching property fails. A property that cannot fail is not a property.
 - Purity: an ESLint rule set for `src/engine/**` forbids `window`, `document`, `localStorage`, `sessionStorage`, `fetch`, `performance`, `navigator`, timers, `requestAnimationFrame`, `Math.random`, `Date.now`, `new Date`, and imports from `src/fx`, `src/ui`, `src/audio`, `src/checks`, `src/hunt`. A unit test uses ESLint's Node API to lint a deliberately bad snippet and expects errors.
 - Unit tests for the WCAG table (14 rows, urls), `parseLevel` error codes, and two fixture levels in `tests/fixtures/levels/` (a valid 3-ghost level and a set of single-fault variants).
 
@@ -126,7 +127,21 @@ Level   { id (kebab-case), chapter: ChapterId, title, look (a look file id), pag
 ## 11. Definition of done
 
 - Every task done; `npm run check` green (typecheck, lint, format:check, tests, asset check) and green again with two other seeds.
-- All 10 properties and at least 6 mutants pass; the purity test passes.
+- All 11 properties and at least 10 mutants pass; the purity test passes.
 - `docs/architecture/engine.md` has a Mermaid diagram, the API table and the properties with one line each on the bug it would catch. `src/engine/README.md` is updated.
 - `docs/KIRO_LOG.md` has a dated entry: what was built, counts (requirements, tasks, properties, mutants, tests) and surprises.
 - Final reply in five lines: what exists; the test counts; anything the brief got wrong; anything you assumed; the credit cost if Kiro shows it.
+
+## 12. Amendments (Nov 14, after the owner audited the first spec)
+
+The first spec was good. These nine changes close real gaps; they are already merged into the sections above, and this list is only the trail.
+
+1. `schema-invalid` is the 15th error code, and shape problems map to the named codes by path (section 5).
+2. `validate` is an overridable rule, so a mutant can break validation (section 7).
+3. `restoreGame` and the "plain data" rule for `GameState` (section 7).
+4. `meet` returns the same state; the step counter counts only `repair`, `undo` and `reset` (section 7).
+5. `reset` is undoable and emits the new `level-reset` event, not `undone`, so a screen reader never hears "undone" after a reset (sections 7 and 8, P5).
+6. Events carry their ids and the story text the shell announces (section 7, P10).
+7. `activePatches` includes decoy picks, so the player can test a wrong repair on the page and see it fail, and the proof checks can run it (section 7, P11).
+8. P6 also checks both ends of `ambient`; P8 deep-freezes its inputs, checks determinism and the JSON round trip (section 8).
+9. Eleven properties and at least ten mutants (sections 8, 9 and 11); `tests/property/fc-config.ts` is owned by this spec (section 3).
