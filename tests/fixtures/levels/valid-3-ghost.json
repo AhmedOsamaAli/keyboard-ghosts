@@ -1,0 +1,126 @@
+{
+  "id": "foyer-test",
+  "chapter": "foyer",
+  "title": "The Foyer",
+  "look": "foyer",
+  "page": "levels/foyer/index.html",
+  "exit": { "selector": "#exit-door" },
+  "hiddenNote": "// built in a hurry. looks fine on my screen.",
+  "ghosts": [
+    {
+      "id": "invisible",
+      "name": "Invisible",
+      "line": "I couldn't tell where I was.",
+      "barrier": "focus-invisible",
+      "wcag": [{ "sc": "2.4.7", "name": "Focus Visible", "level": "AA" }],
+      "selector": "#nav a",
+      "lesson": "A link needs a visible ring when it has focus. Show one with the focus-visible rule. People who use a keyboard rely on it to find their place.",
+      "releaseLine": "Now I can see where I am.",
+      "seenBy": { "axe": false, "levelCheck": true, "walk": true },
+      "repairs": [
+        {
+          "id": "show-ring",
+          "label": "Show a visible focus ring",
+          "patches": [
+            {
+              "op": "css",
+              "css": "a:focus-visible { outline: 3px solid #ffd34d; outline-offset: 2px; }"
+            }
+          ],
+          "correct": true
+        },
+        {
+          "id": "bold-text",
+          "label": "Make the link text bold",
+          "patches": [{ "op": "css", "css": "a { font-weight: 700; }" }],
+          "correct": false,
+          "why": "Bold text does not show where the focus is."
+        },
+        {
+          "id": "bigger-text",
+          "label": "Enlarge the link text",
+          "patches": [{ "op": "css", "css": "a { font-size: 1.4rem; }" }],
+          "correct": false,
+          "why": "A bigger link still has no ring when it has focus."
+        }
+      ]
+    },
+    {
+      "id": "faceless",
+      "name": "Faceless",
+      "line": "Nobody told me what this button did.",
+      "barrier": "unnamed-control",
+      "wcag": [{ "sc": "4.1.2", "name": "Name, Role, Value", "level": "A" }],
+      "selector": "#search-button",
+      "lesson": "A button that holds only an icon needs a name. The name tells people who use a screen reader what the button does.",
+      "releaseLine": "Now I know what it does.",
+      "seenBy": { "axe": true, "levelCheck": false, "walk": false },
+      "repairs": [
+        {
+          "id": "add-name",
+          "label": "Give the button an accessible name",
+          "patches": [
+            { "op": "attr", "selector": "#search-button", "name": "aria-label", "value": "Search" }
+          ],
+          "correct": true
+        },
+        {
+          "id": "add-picture",
+          "label": "Add a magnifier picture to the button",
+          "patches": [
+            {
+              "op": "attr",
+              "selector": "#search-button",
+              "name": "data-icon",
+              "value": "magnifier"
+            }
+          ],
+          "correct": false,
+          "why": "A picture has no name for people who use a screen reader."
+        },
+        {
+          "id": "colour-button",
+          "label": "Colour the button blue",
+          "patches": [{ "op": "css", "css": "#search-button { background: #1f4fd8; }" }],
+          "correct": false,
+          "why": "Colour does not give the button a name."
+        }
+      ]
+    },
+    {
+      "id": "hallway",
+      "name": "Hallway",
+      "line": "I had to walk past every door.",
+      "barrier": "no-skip-link",
+      "wcag": [{ "sc": "2.4.1", "name": "Bypass Blocks", "level": "A" }],
+      "selector": "#top",
+      "lesson": "A long list of links comes before the main part. A skip link lets people who use a keyboard jump straight to it.",
+      "releaseLine": "Straight to the main room.",
+      "seenBy": { "axe": true, "levelCheck": false, "walk": true },
+      "repairs": [
+        {
+          "id": "add-skip-link",
+          "label": "Add a skip link first",
+          "patches": [{ "op": "behavior", "name": "add-skip-link" }],
+          "correct": true
+        },
+        {
+          "id": "hide-menu",
+          "label": "Hide the menu links",
+          "patches": [{ "op": "css", "css": "nav { display: none; }" }],
+          "correct": false,
+          "why": "Hiding the menu removes the links instead of letting people skip them."
+        },
+        {
+          "id": "link-at-end",
+          "label": "Add a Top link at the end",
+          "patches": [
+            { "op": "text", "selector": "#footer-link", "text": "Back to top" }
+          ],
+          "correct": false,
+          "why": "A link at the end does not skip the links before it."
+        }
+      ]
+    }
+  ]
+}
